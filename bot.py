@@ -28,14 +28,21 @@ WELCOME_TEXT = (
 )
 
 MAP_TEXT = (
-    "Подборки моих любимых локаций Москвы в Яндекс картах:\n\n"
-    "🤩классные бары\n"
-    "🤩места для завтраков и бранчей\n"
-    "🤩музеи Москвы и МО\n"
-    "🤩рестораны\n"
-    "🤩кафе, где можно вкусно поесть\n"
-    "🤩места для прогулок\n\n"
-    "Спасибо, что присоединились, карты будут постоянно пополняться новыми локациями 🐚"
+    "Подборки моих любимых локаций Москвы в Яндекс Картах:\n\n"
+    '📍 <a href="https://yandex.ru/maps/?bookmarks%5BpublicId%5D=7GUXDbw7">'
+    "Классные бары</a>\n"
+    '📍 <a href="https://yandex.ru/maps/?bookmarks%5BpublicId%5D=uEFKTT_A">'
+    "Места для завтраков и бранчей</a>\n"
+    '📍 <a href="https://yandex.ru/maps/?bookmarks%5BpublicId%5D=1tT7hv3O">'
+    "Музеи Москвы и МО</a>\n"
+    '📍 <a href="https://yandex.ru/maps/?bookmarks%5BpublicId%5D=eWetwLug">'
+    "Рестораны</a>\n"
+    '📍 <a href="https://yandex.ru/maps/?bookmarks%5BpublicId%5D=1Ppe-nky">'
+    "Кафе, где можно вкусно поесть</a>\n"
+    '📍 <a href="https://yandex.ru/maps/?bookmarks%5BpublicId%5D=H9IPV-8S">'
+    "Места для прогулок</a>\n\n"
+    "Спасибо, что присоединились! Карты будут постоянно пополняться "
+    "новыми локациями."
 )
 
 logging.basicConfig(level=logging.INFO)
