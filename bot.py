@@ -10,6 +10,7 @@ from aiogram.types import (
     CallbackQuery,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
+    LinkPreviewOptions,
     Message,
 )
 from dotenv import load_dotenv
@@ -24,7 +25,7 @@ CHANNEL_URL = f"https://t.me/{CHANNEL_USERNAME}"
 
 WELCOME_TEXT = (
     "Добро пожаловать!\n"
-    "Для получения карты с локациями подпишитесь на канал и нажмите кнопку ниже 👇"
+    "Для получения карты с локациями подпишитесь на канал и нажмите кнопку ниже."
 )
 
 MAP_TEXT = (
@@ -47,29 +48,41 @@ MAP_TEXT = (
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+# Telegram API URLs contain the bot token; never emit them through HTTP logs.
+logging.getLogger("aiohttp.access").setLevel(logging.WARNING)
 
 
 def start_keyboard() -> InlineKeyboardMarkup:
+    """Build the subscription and map buttons."""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text="Подписаться", url=CHANNEL_URL)],
-            [InlineKeyboardButton(text="Получить карту", callback_data="get_map")],
+            [
+                InlineKeyboardButton(
+                    text="Получить карту",
+                    callback_data="get_map",
+                )
+            ],
         ]
     )
 
 
 async def is_subscribed(bot: Bot, user_id: int) -> bool:
+    """Return whether a user can access the map."""
     try:
         member = await bot.get_chat_member(chat_id=CHANNEL_ID, user_id=user_id)
         return member.status in ("member", "administrator", "creator")
-    except Exception as exc:
-        logger.warning("Subscription check failed for user %s: %s", user_id, exc)
+    except Exception:
+        logger.exception("Subscription check failed for user %s", user_id)
         return False
 
 
 async def main() -> None:
+    """Start the bot with long polling."""
     if not BOT_TOKEN:
-        logger.error("BOT_TOKEN is not set. Copy .env.example to .env and add your token.")
+        logger.error(
+            "TELEGRAM_BOT_TOKEN is not configured. Add it as a Replit Secret."
+        )
         sys.exit(1)
 
     bot = Bot(
@@ -84,22 +97,30 @@ async def main() -> None:
 
     @dp.callback_query(F.data == "get_map")
     async def get_map(callback: CallbackQuery) -> None:
-        if not callback.from_user:
+        if callback.message is None:
             await callback.answer()
             return
 
         if await is_subscribed(bot, callback.from_user.id):
-            await callback.message.answer(MAP_TEXT)
+            await callback.message.answer(
+                MAP_TEXT,
+                parse_mode="HTML",
+                link_preview_options=LinkPreviewOptions(is_disabled=True),
+            )
             await callback.answer()
             return
 
         await callback.answer(
-            "Сначала подпишитесь на канал и затем нажмите «Получить карту» снова.",
+            "Сначала подпишитесь на канал, затем нажмите "
+            "«Получить карту» снова.",
             show_alert=True,
         )
 
-    logger.info("Bot @LizaDavay_Bot is starting...")
-    await dp.start_polling(bot)
+    logger.info("Channel-gated location bot is starting")
+    try:
+        await dp.start_polling(bot)
+    finally:
+        await bot.session.close()
 
 
 if __name__ == "__main__":
